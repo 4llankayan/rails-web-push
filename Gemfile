@@ -72,3 +72,7 @@ group :test do
 end
 
 gem "noticed", "~> 2.4"
+
+gem "devise", "~> 4.9"
+
+gem "devise-tailwindcssed", "~> 0.1.6"
