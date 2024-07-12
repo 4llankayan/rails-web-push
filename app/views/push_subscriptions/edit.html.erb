@@ -1,0 +1,8 @@
+<div class="mx-auto md:w-2/3 w-full">
+  <h1 class="font-bold text-4xl">Editing push subscription</h1>
+
+  <%= render "form", push_subscription: @push_subscription %>
+
+  <%= link_to "Show this push subscription", @push_subscription, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+  <%= link_to "Back to push subscriptions", push_subscriptions_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+</div>

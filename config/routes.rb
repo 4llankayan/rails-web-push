@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  resources :push_subscriptions
   resources :push_notifications
   devise_for :users
   resources :posts
