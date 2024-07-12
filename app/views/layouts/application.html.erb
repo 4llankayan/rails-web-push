@@ -8,9 +8,10 @@
     <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body data-controller="push" data-application-server-key="<%= ENV['DEFAULT_APPLICATION_SERVER_KEY'] %>">
     <header>
       <nav class="bg-white border-gray-200 dark:bg-gray-900">
           <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
