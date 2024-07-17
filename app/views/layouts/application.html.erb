@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>NoticedFirebaseNotifications</title>
+    <title>Scalador Notifications</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -18,16 +18,6 @@
               <a href="<%= root_url %>" class="flex items-center space-x-3 rtl:space-x-reverse">
                   <img src="https://labi9.com/images/logo/logo-website-solid.webp?jsx" class="h-8" alt="Flowbite Logo" />
               </a>
-              <div class="flex items-center space-x-6 rtl:space-x-reverse">
-                  <% if user_signed_in? %>
-                  <a class="text-sm text-gray-500 dark:text-white hover:underline">Logged in as <strong><%= current_user.email %></strong>.</a>
-                    <%= link_to 'Edit profile', edit_user_registration_path, :class => 'text-sm text-blue-600 dark:text-blue-500 hover:underline' %> |
-                    <%= link_to "Logout", destroy_user_session_path, method: :delete, :class => 'text-sm text-blue-600 dark:text-blue-500 hover:underline'  %>
-                  <% else %>
-                    <%= link_to "Sign up", new_user_registration_path, :class => 'text-sm text-blue-600 dark:text-blue-500 hover:underline'  %> |
-                    <%= link_to "Login", new_user_session_path, :class => 'text-sm text-blue-600 dark:text-blue-500 hover:underline'  %>
-                  <% end %>
-              </div>
           </div>
       </nav>
     </header>

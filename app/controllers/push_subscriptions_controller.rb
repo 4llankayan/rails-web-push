@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class PushSubscriptionsController < ApplicationController
-  before_action :set_push_subscription, only: %i[ show edit update destroy ]
+  before_action :set_push_subscription, only: %i[show edit update destroy]
 
   # GET /push_subscriptions or /push_subscriptions.json
   def index
@@ -7,8 +9,7 @@ class PushSubscriptionsController < ApplicationController
   end
 
   # GET /push_subscriptions/1 or /push_subscriptions/1.json
-  def show
-  end
+  def show; end
 
   # GET /push_subscriptions/new
   def new
@@ -16,8 +17,7 @@ class PushSubscriptionsController < ApplicationController
   end
 
   # GET /push_subscriptions/1/edit
-  def edit
-  end
+  def edit; end
 
   # POST /push_subscriptions or /push_subscriptions.json
   def create
@@ -25,7 +25,9 @@ class PushSubscriptionsController < ApplicationController
 
     respond_to do |format|
       if @push_subscription.save
-        format.html { redirect_to push_subscription_url(@push_subscription), notice: "Push subscription was successfully created." }
+        format.html do
+          redirect_to push_subscription_url(@push_subscription), notice: 'Push subscription was successfully created.'
+        end
         format.json { render :show, status: :created, location: @push_subscription }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -38,7 +40,9 @@ class PushSubscriptionsController < ApplicationController
   def update
     respond_to do |format|
       if @push_subscription.update(push_subscription_params)
-        format.html { redirect_to push_subscription_url(@push_subscription), notice: "Push subscription was successfully updated." }
+        format.html do
+          redirect_to push_subscription_url(@push_subscription), notice: 'Push subscription was successfully updated.'
+        end
         format.json { render :show, status: :ok, location: @push_subscription }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -52,19 +56,20 @@ class PushSubscriptionsController < ApplicationController
     @push_subscription.destroy!
 
     respond_to do |format|
-      format.html { redirect_to push_subscriptions_url, notice: "Push subscription was successfully destroyed." }
+      format.html { redirect_to push_subscriptions_url, notice: 'Push subscription was successfully destroyed.' }
       format.json { head :no_content }
     end
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_push_subscription
-      @push_subscription = PushSubscription.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def push_subscription_params
-      params.require(:push_subscription).permit(:endpoint, :p256dh, :auth, :subscribed)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_push_subscription
+    @push_subscription = PushSubscription.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def push_subscription_params
+    params.require(:push_subscription).permit(:endpoint, :p256dh, :auth, :subscribed)
+  end
 end

@@ -1,75 +1,112 @@
 # frozen_string_literal: true
 
+# push notification controller
 class PushNotificationsController < ApplicationController
-  before_action :set_push_notification, only: %i[show edit update destroy]
+  before_action :authenticate_user!, except: [:subscribe]
+  before_action :set_push_notification, only: %i[show edit destroy]
 
-  # GET /push_notifications or /push_notifications.json
   def index
     @push_notifications = PushNotification.all
+    @page_title = 'Push Notifications'
   end
 
-  # GET /push_notifications/1 or /push_notifications/1.json
-  def show; end
+  def show
+    @page_title = 'Push Notification Details'
+  end
 
-  # GET /push_notifications/new
   def new
     @push_notification = PushNotification.new
   end
 
-  # GET /push_notifications/1/edit
-  def edit; end
-
-  # POST /push_notifications or /push_notifications.json
   def create
     @push_notification = PushNotification.new(push_notification_params)
 
-    respond_to do |format|
-      if @push_notification.save
+    if @push_notification.save
+      send_push_notification(@push_notification)
+      respond_to do |format|
         format.html do
-          redirect_to push_notification_url(@push_notification), notice: 'Push notification was successfully created.'
+          redirect_to admin_push_notifications_path, notice: 'Push Notification was successfully created'
         end
-        format.json { render :show, status: :created, location: @push_notification }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @push_notification.errors, status: :unprocessable_entity }
+        format.turbo_stream { flash.now[:notice] = 'Push Notification was successfully created' }
       end
+    else
+      render :new, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /push_notifications/1 or /push_notifications/1.json
-  def update
-    respond_to do |format|
-      if @push_notification.update(push_notification_params)
-        format.html do
-          redirect_to push_notification_url(@push_notification), notice: 'Push notification was successfully updated.'
-        end
-        format.json { render :show, status: :ok, location: @push_notification }
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: @push_notification.errors, status: :unprocessable_entity }
-      end
-    end
-  end
-
-  # DELETE /push_notifications/1 or /push_notifications/1.json
   def destroy
-    @push_notification.destroy!
-
+    @push_notification.destroy
     respond_to do |format|
-      format.html { redirect_to push_notifications_url, notice: 'Push notification was successfully destroyed.' }
-      format.json { head :no_content }
+      format.html do
+        redirect_to admin_push_notifications_path, notice: 'Push Notification was successfully destroyed.'
+      end
+      format.turbo_stream do
+        flash.now[:notice] = 'Push Notification was successfully destroyed.'
+      end
+    end
+  end
+
+  def subscribe
+    subscription = PushSubscription.new(
+      endpoint: params[:endpoint],
+      p256dh: params[:p256dh],
+      auth: params[:auth],
+      subscribed: true
+    )
+
+    if subscription.save
+      render json: { message: 'Subscription successfully saved' }, status: :ok
+    else
+      render json: { error: 'Error in storing subscription' }, status: :unprocessable_entity
     end
   end
 
   private
 
-  # Use callbacks to share common setup or constraints between actions.
   def set_push_notification
     @push_notification = PushNotification.find(params[:id])
   end
 
-  # Only allow a list of trusted parameters through.
   def push_notification_params
     params.require(:push_notification).permit(:title, :body)
+  end
+
+  def send_push_notification(push_notification)
+    subscriptions = active_push_subscriptions
+    latest_subscription = subscriptions.last
+    return unless latest_subscription
+
+    message = build_push_message(push_notification)
+    vapid_details = build_vapid_details
+    send_web_push_notification(message, latest_subscription, vapid_details)
+  end
+
+  def active_push_subscriptions
+    PushSubscription.where(subscribed: true)
+  end
+
+  def build_push_message(push_notification)
+    {
+      title: push_notification.title,
+      body: push_notification.body,
+    }
+  end
+
+  def build_vapid_details
+    {
+      subject: "mailto:#{ENV['DEFAULT_EMAIL']}",
+      public_key: ENV['DEFAULT_APPLICATION_SERVER_KEY'],
+      private_key: ENV['DEFAULT_PRIVATE_KEY']
+    }
+  end
+
+  def send_web_push_notification(message, subscription, vapid_details)
+    WebPush.payload_send(
+      message: JSON.generate(message),
+      endpoint: subscription.endpoint,
+      p256dh: subscription.p256dh,
+      auth: subscription.auth,
+      vapid: vapid_details
+    )
   end
 end

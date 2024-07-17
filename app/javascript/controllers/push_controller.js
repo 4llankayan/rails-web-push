@@ -18,9 +18,13 @@ export default class extends Controller {
   }
 
   registerServiceWorker() {
+    const serverKey = this.urlBase64ToUnit8Array(
+      this.element.getAttribute("data-application-server-key")
+    );
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
-        .register('service_worker.js')
+        .register('../service_worker.js')
         .then((serviceWorkerRegistration) => {
           serviceWorkerRegistration.pushManager
             .getSubscription()
@@ -29,9 +33,7 @@ export default class extends Controller {
                 serviceWorkerRegistration.pushManager
                   .subscribe({
                     userVisibleOnly: true,
-                    applicationServerKey: this.element.getAttribute(
-                      "data-application-server-key"
-                    ),
+                    applicationServerKey: serverKey
                   })
                   .then((subscription) => {
                     this.saveSubscription(subscription);
@@ -43,6 +45,19 @@ export default class extends Controller {
           console.error("Error during registration Service Worker:", error);
         });
     }
+  }
+
+  urlBase64ToUnit8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const rawData = atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
   }
 
   saveSubscription(subscription) {
@@ -60,7 +75,7 @@ export default class extends Controller {
       )
     );
 
-    fetch("/admin/push_notifications/subscribe", {
+    fetch("/push_notifications/subscribe", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
